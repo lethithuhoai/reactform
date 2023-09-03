@@ -1,35 +1,75 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, current } from '@reduxjs/toolkit'
 
-const initialState = {
+let initialState = {
     productList: [],
-    productList: undefined,
+    searchList: [],
+    productEdit: false
 }
 
-const baiTapFormSlice = createSlice({
+function removeAccents(str) {
+    var AccentsMap = [
+        "aàảãáạăằẳẵắặâầẩẫấậ",
+        "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+        "dđ", "DĐ",
+        "eèẻẽéẹêềểễếệ",
+        "EÈẺẼÉẸÊỀỂỄẾỆ",
+        "iìỉĩíị",
+        "IÌỈĨÍỊ",
+        "oòỏõóọôồổỗốộơờởỡớợ",
+        "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+        "uùủũúụưừửữứự",
+        "UÙỦŨÚỤƯỪỬỮỨỰ",
+        "yỳỷỹýỵ",
+        "YỲỶỸÝỴ"
+    ];
+    for (var i = 0; i < AccentsMap.length; i++) {
+        var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+        var char = AccentsMap[i][0];
+        str = str.replace(re, char);
+    }
+    return str;
+}
+
+export const baiTapFormSlice = createSlice({
     name: 'baiTapForm',
     initialState,
     reducers: {
-        addProduct: (state, payload) => {
-            state.productList.push(payload)
+        addProduct: (state, action) => {
+            state.productList.push(action.payload)
+            state.searchList.push(action.payload)
         },
-        deleteProduct: (state, payload) => {
-            state.productList = state.productList.filter((prd) => prd.id !== payload?.id)
+        deleteProduct: (state, action) => {
+            state.productList = state.productList.filter((prd) => prd.id !== action.payload)
+            state.searchList = state.searchList.filter((prd) => prd.id !== action.payload)
         },
         editProduct: (state, { payload }) => {
             state.productEdit = payload
         },
-        updateProduct: (state, { payload }) => {
-            //c1:
-            const index = state.productList.findIndex((prd) => prd.id === payload.id)
-            state.productList[index] = payload
-            //c2:
+        updateProduct: (state, action) => {
             state.productList = state.productList.map((prd) => {
-                if (prd.id === payload.id) {
-                    return payload
+                if (prd.id === action.payload.id) {
+                    return action.payload
                 }
                 return prd
             })
-            state.productEdit = undefined
+            state.productEdit = null
+        },
+        searchStudent: (state, action) => {
+            console.log("test", current(state.productList));
+            console.log("searchList", current(state.searchList));
+            if (action.payload === "") {
+                state.productList = state.searchList
+            } else {
+                let newArrSearch = [];
+                state.searchList.forEach((e) => {
+                    const name = removeAccents(e?.name?.toUpperCase());
+
+                    if (name?.match(action.payload?.toUpperCase())?.[0]) {
+                        newArrSearch.push(e);
+                    }
+                });
+                state.productList = newArrSearch
+            }
         },
     },
 })

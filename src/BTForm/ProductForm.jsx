@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { baiTapFormActions } from '../baiTapForm/slice'
 
 const ProductForm = () => {
-    const [formValue, setFormValue] = useState()
-    const [formError, setFormError] = useState()
+    const [formValue, setFormValue] = useState({})
+    const [formError, setFormError] = useState({})
     const { productEdit } = useSelector((state) => state.baiTapForm)
 
     const dispatch = useDispatch()
@@ -40,13 +40,7 @@ const ProductForm = () => {
             [name]: value,
         })
     }
-    useEffect(() => {
-        // if (!productEdit) return
-        // setFormValue(productEdit)
-        if (productEdit) {
-            setFormValue(productEdit)
-        }
-    }, [productEdit])
+
     const handleSubmitFormStudent = (ev) => {
         // ngăn chặn sự kiện reload của browser khi submit form
         ev.preventDefault()
@@ -61,21 +55,23 @@ const ProductForm = () => {
         setFormError(errors)
 
         let isFlag = false
-        for (let key in formError) {
+        for (let key in errors) {
 
-            if (formError[key]) {
+            if (errors[key]) {
                 isFlag = true
                 break
             }
-        } if (isFlag)
-            return
-
+        } 
+        if (isFlag) return
         if (!productEdit) {
-
             //submit create product
             dispatch(baiTapFormActions.addProduct(formValue))
         } else {
-            dispatch(baiTapFormActions.updateProduct(formValue))
+            let obj = {}
+            elements.forEach(e => {
+                obj[e.name] = e.value
+            })
+            dispatch(baiTapFormActions.updateProduct(obj))
         }
     }
 
@@ -87,8 +83,7 @@ const ProductForm = () => {
                 <div className="col-6">
                     <p>Mã sinh viên</p>
                     <input type="text" className="form-control" name='id' title='mã sinh viên' disabled={!!productEdit}
-                        // value={formValue?.id || ""} 
-                        value={productEdit?.id}
+                        value={formValue?.id}
                         required
                         minLength={5}
                         maxLength={20}
@@ -101,30 +96,27 @@ const ProductForm = () => {
                     <p>Họ tên</p>
                     <input type="text" className="form-control" name='name' title='họ và tên'
                         // value={formValue?.name || ""} 
-                        value={productEdit?.image}
+                        value={formValue?.name}
                         onChange={handleFormValue()} required minLength={10}
                     />
                     {formError?.name && <p className='text-danger'>{formError?.name}</p>}
                 </div>
                 <div className="col-6">
                     <p>Số điện thoại</p>
-                    <input type="number" className="form-control" name='phonenumber' title='số điện thoại' value={formValue?.phonenumber || ""} onChange={handleFormValue()} required pattern='^[0-9]+$' />
+                    <input type="number" className="form-control" name='phonenumber' title='số điện thoại' value={formValue?.phonenumber && formValue?.phonenumber*1} onChange={handleFormValue()} required pattern='^[0-9]+$' />
                     {formError?.phonenumber && <p className='text-danger'>{formError?.phonenumber}</p>}
                 </div>
                 <div className="col-6">
                     <p>Email</p>
-                    <input type="text" className="form-control" name='email' title='email' value={formValue?.email || ""} onChange={handleFormValue()} required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" />
+                    <input type="text" className="form-control" name='email' title='email' value={formValue?.email} onChange={handleFormValue()} required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" />
                     {formError?.email && <p className='text-danger'>{formError?.email}</p>}
                 </div>
             </div>
-
             <div className='mt-3 d-flex gap-3'>
                 {productEdit ? (
-
-                    <button className='btn btn-success'>Thêm sinh viên</button>
-                ) : (
-
                     <button className='btn btn-info'>Cập nhật</button>
+                ) : (
+                    <button className='btn btn-success'>Thêm sinh viên</button>
                 )}
             </div>
         </form>

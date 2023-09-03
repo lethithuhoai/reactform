@@ -1,13 +1,28 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { baiTapFormActions } from '../baiTapForm/slice'
 
 const ProductTable = () => {
     const { productList } = useSelector((state) => state.baiTapForm)
     const dispatch = useDispatch()
+    const [searchValue, setSearchValue] = useState()
 
+    useEffect(() => {
+        if (searchValue) {
+            dispatch(baiTapFormActions.searchStudent(searchValue))
+        }
+        if (searchValue === "") {
+            dispatch(baiTapFormActions.searchStudent(searchValue))
+        }
+    }, [searchValue])
+
+    const handleSearch = (value) => {
+        setSearchValue(value)
+    }
     return (
         <div className='mt-5'>
+
+            <input placeholder='Nhập tên sinh viên để tìm kiếm' style={{ width: "1200px", marginBottom: "10px" }} onChange={(e) => handleSearch(e.target.value)} />
             <table className='table'>
                 <thead className='table-dark'>
                     <tr>
@@ -23,17 +38,17 @@ const ProductTable = () => {
                         productList?.map((prd) => {
 
                             return (
-                                <tr key={prd?.payload?.id}>
-                                    <td>{prd?.payload?.id}</td>
-                                    <td>{prd?.payload?.name}</td>
-                                    <td>{prd?.payload?.phonenumber}</td>
-                                    <td>{prd?.payload?.email}</td>
+                                <tr key={prd?.id}>
+                                    <td>{prd?.id}</td>
+                                    <td>{prd?.name}</td>
+                                    <td>{prd?.phonenumber}</td>
+                                    <td>{prd?.email}</td>
                                     <td className='d-flex gap-3'>
                                         <button className='btn btn-success' onClick={() => {
-                                            dispatch(baiTapFormActions.editProduct(prd))
+                                            dispatch(baiTapFormActions.editProduct(true))
                                         }}>Edit</button>
                                         <button className='btn btn-danger' onClick={() => {
-                                            dispatch(baiTapFormActions.deleteProduct(prd?.payload?.id))
+                                            dispatch(baiTapFormActions.deleteProduct(prd?.id))
                                         }}>Delete</button>
                                     </td>
                                 </tr>
